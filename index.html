@@ -1,0 +1,1135 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Digitalna vizitka</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Archivo:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#06111f;
+    --paper-2:#0b1728;
+    --ink:#F8F9FA;
+    --ink-soft:#9fb0c7;
+    --line:rgba(27,42,68,.16);
+    --line-strong:rgba(27,42,68,.34);
+    --card-1:#16263F;
+    --card-2:#0C172C;
+    --card-ink:#EDE8DA;
+    --card-soft:#9AA3B8;
+    --gold:#D4AF37;
+    --gold-deep:#8C6D2A;
+    --gold-hi:#f4d97a;
+    --danger:#9C3D2E;
+    --focus:rgba(194,161,75,.45);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    background:var(--paper);
+    background-image:
+      radial-gradient(900px 520px at 85% -10%, rgba(255,255,255,.65), transparent 60%),
+      radial-gradient(700px 500px at -10% 110%, rgba(27,42,68,.06), transparent 60%);
+    color:var(--ink);
+    font-family:'Archivo',-apple-system,'Segoe UI',sans-serif;
+    font-size:15px; line-height:1.5;
+    min-height:100vh; -webkit-font-smoothing:antialiased;
+  }
+  [hidden]{display:none !important}
+  .page{max-width:1080px;margin:0 auto;padding:44px 22px 70px}
+
+  .kicker{font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:var(--ink-soft);margin:0 0 12px;font-weight:600}
+  h1{font-family:'Marcellus',Georgia,serif;font-weight:400;font-size:clamp(28px,4.4vw,42px);line-height:1.12;margin:0 0 10px;letter-spacing:.005em}
+  .tag{color:var(--ink-soft);margin:0 0 38px;max-width:58ch}
+  .col-cap{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-soft);margin:0 0 12px;font-weight:600}
+
+  .editor-grid,.share-grid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:38px;align-items:start}
+  @media (max-width:900px){
+    .editor-grid,.share-grid{grid-template-columns:1fr}
+    .preview-col{order:2}
+  }
+
+  .panel{background:var(--paper-2);border:1px solid var(--line);border-radius:16px;padding:26px 24px;box-shadow:0 18px 40px -30px rgba(27,42,68,.35)}
+  .panel h2{font-family:'Marcellus',Georgia,serif;font-weight:400;font-size:20px;margin:0 0 18px}
+
+  .field{margin-bottom:14px}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media (max-width:540px){.row2{grid-template-columns:1fr}}
+  label{display:block;font-size:12.5px;color:var(--ink-soft);margin-bottom:6px;font-weight:500}
+  .req{color:var(--gold-deep)}
+  input{width:100%;background:#101c2d;border:1px solid var(--line-strong);border-radius:10px;padding:10px 12px;color:var(--ink);font:inherit;font-size:14.5px;transition:border-color .15s,box-shadow .15s}
+  input::placeholder{color:#6b7a90;opacity:.48}
+  input:focus{outline:none;border-color:var(--ink);box-shadow:0 0 0 3px var(--focus)}
+  button:focus-visible,summary:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+
+  .extra{background:rgba(27,42,68,.04);border:1px dashed var(--line-strong);border-radius:12px;padding:12px}
+  .x-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px}
+  .x-label{font-size:12.5px;color:var(--ink-soft);font-weight:500}
+  .x-label-input{flex:1;width:auto;background:transparent;border:none;border-bottom:1px dashed var(--line-strong);border-radius:0;padding:2px 0;font-size:12.5px;color:#718097;font-weight:500}
+  .x-label-input:focus{outline:none;border-bottom-color:var(--ink);box-shadow:none}
+  .x-del{background:none;border:none;color:var(--ink-soft);font:inherit;font-size:12px;cursor:pointer;padding:2px 4px;text-decoration:underline;text-underline-offset:2px}
+  .x-del:hover{color:var(--danger)}
+
+  .chips-wrap{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:6px 0 22px}
+  .chips-label{font-size:12.5px;color:var(--ink-soft);font-weight:500}
+  .chips{display:flex;gap:8px;flex-wrap:wrap}
+  .chip{background:transparent;border:1px solid var(--line-strong);border-radius:999px;padding:6px 12px;font:inherit;font-size:13px;color:var(--ink);cursor:pointer;transition:border-color .15s,background .15s}
+  .chip:hover{border-color:var(--ink);background:rgba(27,42,68,.06)}
+
+  .btn{font:inherit;font-size:14.5px;font-weight:500;border-radius:11px;padding:11px 18px;cursor:pointer;border:1px solid var(--line-strong);background:#101c2d;color:var(--ink);transition:background .15s,border-color .15s,transform .05s}
+  .btn:hover{border-color:var(--ink)}
+  .btn:active{transform:translateY(1px)}
+  .btn.primary{background:var(--ink);border-color:var(--ink);color:var(--paper-2)}
+  .btn.primary:hover{background:#24375A}
+  .btn.primary:disabled{opacity:.6;cursor:default}
+  .btn.ghost{background:transparent;border-color:transparent;color:var(--ink-soft)}
+  .btn.ghost:hover{color:var(--danger)}
+  .btn.ghost.armed{color:var(--danger);font-weight:600}
+  .form-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:4px}
+
+  .err{color:var(--danger);font-size:13px;margin:6px 0 0}
+  .note{color:var(--ink-soft);font-size:13px;margin:12px 0 0}
+
+  /* ---- kartica ---- */
+  .biz-mount{max-width:470px}
+  .biz-card{
+    position:relative;
+    background:linear-gradient(150deg,var(--card-1) 0%,var(--card-2) 100%);
+    color:var(--card-ink);
+    border-radius:14px;
+    padding:34px 32px 30px;
+    box-shadow:0 34px 60px -28px rgba(12,23,44,.55), 0 6px 16px -8px rgba(12,23,44,.35);
+    overflow:hidden;
+  }
+  .biz-frame{position:absolute;inset:10px;border:1px solid rgba(194,161,75,.55);border-radius:9px;pointer-events:none}
+  .card-top{display:flex;gap:16px;align-items:center;margin-bottom:18px}
+  .monogram{width:56px;height:56px;border-radius:50%;padding:2px;flex:none;background:linear-gradient(135deg,var(--gold-deep) 0%,var(--gold-hi) 45%,var(--gold) 70%,var(--gold-deep) 100%)}
+  .monogram-in{width:100%;height:100%;border-radius:50%;background:var(--card-2);display:flex;align-items:center;justify-content:center;font-family:'Marcellus',Georgia,serif;font-size:19px;letter-spacing:.06em;color:var(--gold-hi)}
+  .card-name{font-family:'Marcellus',Georgia,serif;font-weight:400;font-size:clamp(22px,2.6vw,27px);line-height:1.15;margin:0;letter-spacing:.01em;overflow-wrap:anywhere}
+  .card-name.is-ph{color:var(--card-soft)}
+  .card-role{margin:4px 0 0;font-size:11px;text-transform:uppercase;letter-spacing:.16em;color:var(--gold);overflow-wrap:anywhere}
+  .card-rule{height:1px;background:linear-gradient(90deg,rgba(194,161,75,.55),rgba(194,161,75,0));margin:0 0 16px}
+  .card-rows{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+  .card-rows li{display:flex;gap:12px;align-items:flex-start;font-size:14px;line-height:1.45}
+  .row-ic{color:var(--gold);flex:none;margin-top:2px;display:inline-flex}
+  .row-ic svg{display:block}
+  .row-tx{overflow-wrap:anywhere}
+  .row-ph{color:var(--card-soft);font-style:italic;font-size:13.5px}
+  @media (max-width:540px){.biz-card{padding:26px 22px 24px}}
+
+  /* ---- QR ---- */
+  .qr-col{display:flex;flex-direction:column;align-items:flex-start}
+  .qr-tile{background:#101c2d;border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:0 20px 44px -26px rgba(27,42,68,.45)}
+  #qrcode{display:flex;align-items:center;justify-content:center;width:248px;height:248px}
+  #qrcode canvas{display:block;image-rendering:pixelated;image-rendering:crisp-edges}
+  .qr-err{width:232px;height:232px;font-size:13px;color:var(--danger);margin:0;display:flex;align-items:center;text-align:center}
+  .qr-cap{font-size:13px;color:var(--ink-soft);margin:12px 0 18px;max-width:34ch}
+  .actions{display:flex;flex-wrap:wrap;gap:8px}
+  .wallet{margin-top:24px;max-width:400px;border-top:1px solid var(--line);padding-top:14px}
+  .wallet summary{cursor:pointer;font-weight:500;font-size:14px}
+  .wallet p{font-size:13.5px;color:var(--ink-soft);line-height:1.55;margin:10px 0 0}
+
+  #splash{padding:90px 0;text-align:center;color:var(--ink-soft);font-size:14px;letter-spacing:.04em}
+  #toast{position:fixed;left:50%;bottom:26px;transform:translate(-50%,10px);background:var(--ink);color:var(--paper-2);padding:10px 18px;border-radius:999px;font-size:13.5px;opacity:0;transition:opacity .18s,transform .18s;pointer-events:none;z-index:60}
+  #toast.show{opacity:1;transform:translate(-50%,0)}
+  .foot{margin-top:56px;text-align:center;color:var(--ink-soft);font-size:12.5px}
+
+  @media (prefers-reduced-motion:reduce){
+    *{transition:none !important;animation:none !important;scroll-behavior:auto !important}
+  }
+</style>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Vizitka">
+<meta name="theme-color" content="#06111f">
+<meta name="theme-color" content="#16263F">
+</head>
+<body>
+<div class="page">
+  <header>
+    <p class="kicker">Digitalna vizitka</p>
+    <h1>Vizitka koja stane u jedan QR kod.</h1>
+    <p class="tag">Upiši svoje podatke jednom. Svatko tko skenira tvoj QR kod kamerom mobitela dobije ponudu za spremanje kontakta — bez aplikacije, bez tipkanja.</p>
+  </header>
+
+  <div id="splash">Učitavanje…</div>
+
+  <section id="view-editor" hidden>
+    <div class="editor-grid">
+      <div class="panel">
+        <h2>Tvoji podaci</h2>
+
+        <div class="field">
+          <label for="f-name">Ime i prezime <span class="req">*</span></label>
+          <input id="f-name" data-key="name" type="text" autocomplete="name" placeholder="Ana Anić">
+          <p id="name-err" class="err" hidden>Upiši barem ime — bez njega QR kod ne može nastati.</p>
+        </div>
+        <div class="row2">
+          <div class="field">
+            <label for="f-position">Pozicija</label>
+            <input id="f-position" data-key="position" type="text" autocomplete="organization-title" placeholder="Voditeljica prodaje">
+          </div>
+          <div class="field">
+            <label for="f-company">Tvrtka</label>
+            <input id="f-company" data-key="company" type="text" autocomplete="organization" placeholder="Acme d.o.o.">
+          </div>
+        </div>
+        <div class="row2">
+          <div class="field">
+            <label for="f-phone">Telefon</label>
+            <input id="f-phone" data-key="phone" type="tel" autocomplete="tel" placeholder="+385 91 234 5678">
+          </div>
+          <div class="field">
+            <label for="f-email">Email</label>
+            <input id="f-email" data-key="email" type="email" autocomplete="email" placeholder="ana@acme.hr">
+          </div>
+        </div>
+        <div class="row2">
+          <div class="field">
+            <label for="f-website">Web stranica</label>
+            <input id="f-website" data-key="website" type="text" placeholder="acme.hr">
+          </div>
+          <div class="field">
+            <label for="f-address">Adresa</label>
+            <input id="f-address" data-key="address" type="text" autocomplete="street-address" placeholder="Ilica 1, 10000 Zagreb">
+          </div>
+        </div>
+
+        <div id="extras"></div>
+
+        <div class="chips-wrap">
+          <span class="chips-label">Dodaj polje</span>
+          <div class="chips">
+            <button type="button" class="chip" data-add="phone">+ Telefon</button>
+            <button type="button" class="chip" data-add="email">+ Email</button>
+            <button type="button" class="chip" data-add="web">+ Web</button>
+            <button type="button" class="chip" data-add="other">+ Drugo</button>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" id="btn-save" class="btn primary">Spremi i generiraj QR</button>
+          <button type="button" id="btn-reset" class="btn ghost">Obriši sve</button>
+        </div>
+        <p id="storage-note" class="note" hidden>Trajno spremanje nije dostupno u ovom okruženju — podaci vrijede dok je kartica otvorena.</p>
+      </div>
+
+      <aside class="preview-col">
+        <p class="col-cap">Pregled uživo</p>
+        <div class="biz-mount" id="card-preview"></div>
+      </aside>
+    </div>
+  </section>
+
+  <section id="view-card" hidden>
+    <div class="share-grid">
+      <div class="card-col">
+        <p class="col-cap">Tvoja kartica</p>
+        <div class="biz-mount" id="card-final"></div>
+      </div>
+      <div class="qr-col">
+        <p class="col-cap">QR za dijeljenje</p>
+        <div class="qr-tile"><div id="qrcode"></div></div>
+        <p class="qr-cap">Skeniraj kamerom mobitela — odmah se nudi spremanje kontakta.</p>
+        <div class="actions">
+          <button type="button" id="btn-share" class="btn primary">Podijeli</button>
+          <button type="button" id="btn-png" class="btn">Preuzmi QR (PNG)</button>
+          <button type="button" id="btn-vcf" class="btn">Preuzmi .vcf</button>
+          <button type="button" id="btn-edit" class="btn ghost">Uredi podatke</button>
+        </div>
+        <details class="wallet">
+          <summary>A Apple Wallet?</summary>
+          <p>Pravi Wallet pass (.pkpass) mora biti kriptografski potpisan certifikatom iz Apple Developer računa, pa se ne može generirati izravno u pregledniku. Dobra vijest: ovaj QR radi i bez Walleta — kamera iPhonea ili Androida nakon skeniranja odmah nudi spremanje kontakta. Sliku QR-a možeš spremiti u Fotografije i pokazati je kao karticu kad zatreba.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <footer class="foot">Podaci ostaju kod tebe — spremaju se uz ovu aplikaciju i ne šalju se nikome.</footer>
+</div>
+<div id="toast" role="status"></div>
+
+<script>
+/* === Ugradjeni QR generator (vlastiti, validiran do razine bita; UTF-8/dijakritike) === */
+var QR_TABLES = {"maxV": {"L": 40, "M": 40}, "T": {"L": [[26, 1, 7], [44, 1, 10], [70, 1, 15], [100, 1, 20], [134, 1, 26], [172, 2, 18], [196, 2, 20], [242, 2, 24], [292, 2, 30], [346, 4, 18], [404, 4, 20], [466, 4, 24], [532, 4, 26], [581, 4, 30], [655, 6, 22], [733, 6, 24], [815, 6, 28], [901, 6, 30], [991, 7, 28], [1085, 8, 28], [1156, 8, 28], [1258, 9, 28], [1364, 9, 30], [1474, 10, 30], [1588, 12, 26], [1706, 12, 28], [1828, 12, 30], [1921, 13, 30], [2051, 14, 30], [2185, 15, 30], [2323, 16, 30], [2465, 17, 30], [2611, 18, 30], [2761, 19, 30], [2876, 19, 30], [3034, 20, 30], [3196, 21, 30], [3362, 22, 30], [3532, 24, 30], [3706, 25, 30]], "M": [[26, 1, 10], [44, 1, 16], [70, 1, 26], [100, 2, 18], [134, 2, 24], [172, 4, 16], [196, 4, 18], [242, 4, 22], [292, 5, 22], [346, 5, 26], [404, 5, 30], [466, 8, 22], [532, 9, 22], [581, 9, 24], [655, 10, 24], [733, 10, 28], [815, 11, 28], [901, 13, 26], [991, 14, 26], [1085, 16, 26], [1156, 17, 26], [1258, 17, 28], [1364, 18, 28], [1474, 20, 28], [1588, 21, 28], [1706, 23, 28], [1828, 25, 28], [1921, 26, 28], [2051, 28, 28], [2185, 29, 28], [2323, 31, 28], [2465, 33, 28], [2611, 35, 28], [2761, 37, 28], [2876, 38, 28], [3034, 40, 28], [3196, 43, 28], [3362, 45, 28], [3532, 47, 28], [3706, 49, 28]]}};
+var QRMatrix = (function () {
+  'use strict';
+
+  var EXP = new Array(512), LOG = new Array(256);
+  (function () {
+    var x = 1;
+    for (var i = 0; i < 255; i++) { EXP[i] = x; LOG[x] = i; x <<= 1; if (x & 0x100) x ^= 0x11D; }
+    for (var j = 255; j < 512; j++) EXP[j] = EXP[j - 255];
+  })();
+  function gmul(a, b) { if (a === 0 || b === 0) return 0; return EXP[LOG[a] + LOG[b]]; }
+
+  function genPoly(ec) {
+    var g = [1];
+    for (var i = 0; i < ec; i++) {
+      var ng = new Array(g.length + 1);
+      for (var k = 0; k < ng.length; k++) ng[k] = 0;
+      for (var j = 0; j < g.length; j++) {
+        ng[j] ^= g[j];
+        ng[j + 1] ^= gmul(g[j], EXP[i]);
+      }
+      g = ng;
+    }
+    return g;
+  }
+
+  function rsRemainder(data, ec) {
+    var g = genPoly(ec);
+    var rem = data.slice();
+    for (var z = 0; z < ec; z++) rem.push(0);
+    for (var i = 0; i < data.length; i++) {
+      var f = rem[i];
+      if (f !== 0) {
+        for (var j = 1; j < g.length; j++) rem[i + j] ^= gmul(g[j], f);
+      }
+    }
+    return rem.slice(data.length);
+  }
+
+  function toUTF8(str) {
+    var out = [];
+    for (var i = 0; i < str.length; i++) {
+      var c = str.charCodeAt(i);
+      if (c >= 0xD800 && c <= 0xDBFF && i + 1 < str.length) {
+        var c2 = str.charCodeAt(i + 1);
+        if (c2 >= 0xDC00 && c2 <= 0xDFFF) { c = 0x10000 + ((c - 0xD800) << 10) + (c2 - 0xDC00); i++; }
+      }
+      if (c < 0x80) out.push(c);
+      else if (c < 0x800) { out.push(0xC0 | (c >> 6), 0x80 | (c & 63)); }
+      else if (c < 0x10000) { out.push(0xE0 | (c >> 12), 0x80 | ((c >> 6) & 63), 0x80 | (c & 63)); }
+      else { out.push(0xF0 | (c >> 18), 0x80 | ((c >> 12) & 63), 0x80 | ((c >> 6) & 63), 0x80 | (c & 63)); }
+    }
+    return out;
+  }
+
+  function levelRow(level, version) { return QR_TABLES.T[level][version - 1]; }
+  function dataCapacity(version, level) { var t = levelRow(level, version); return t[0] - t[1] * t[2]; }
+  function ccBits(version) { return version <= 9 ? 8 : 16; }
+  function fitsIn(version, level, nBytes) { return 4 + ccBits(version) + 8 * nBytes <= dataCapacity(version, level) * 8; }
+  function pickVersion(nBytes, level) {
+    var mv = QR_TABLES.maxV[level];
+    for (var v = 1; v <= mv; v++) if (fitsIn(v, level, nBytes)) return v;
+    return 0;
+  }
+  function maxBytes() {
+    var mvL = QR_TABLES.maxV.L;
+    return Math.floor((dataCapacity(mvL, 'L') * 8 - 20) / 8);
+  }
+
+  function alignPositions(version) {
+    if (version === 1) return [];
+    var n = Math.floor(version / 7) + 2;
+    var step = version === 32 ? 26 : Math.floor((version * 4 + n * 2 + 1) / (n * 2 - 2)) * 2;
+    var size = 17 + 4 * version;
+    var pos = [6];
+    var p = size - 7;
+    for (var i = 0; i < n - 1; i++) { pos.push(p); p -= step; }
+    pos.sort(function (a, b) { return a - b; });
+    return pos;
+  }
+
+  function buildCodewords(bytes, version, level) {
+    var t = levelRow(level, version);
+    var total = t[0], nb = t[1], ec = t[2];
+    var dataTotal = total - nb * ec;
+    var capBits = dataTotal * 8;
+    var bits = [];
+    function put(num, len) { for (var i = len - 1; i >= 0; i--) bits.push((num >>> i) & 1); }
+    put(4, 4);
+    put(bytes.length, ccBits(version));
+    for (var i = 0; i < bytes.length; i++) put(bytes[i], 8);
+    var term = Math.min(4, capBits - bits.length);
+    for (var q = 0; q < term; q++) bits.push(0);
+    while (bits.length % 8 !== 0) bits.push(0);
+    var toggle = true;
+    while (bits.length < capBits) { put(toggle ? 0xEC : 0x11, 8); toggle = !toggle; }
+    var data = [];
+    for (var b = 0; b < bits.length; b += 8) {
+      var by = 0;
+      for (var k = 0; k < 8; k++) by = (by << 1) | bits[b + k];
+      data.push(by);
+    }
+    var shortLen = Math.floor(dataTotal / nb);
+    var nLong = dataTotal % nb;
+    var nShort = nb - nLong;
+    var dataBlocks = [], ecBlocks = [], pos = 0, maxData = 0;
+    for (var bi = 0; bi < nb; bi++) {
+      var dlen = bi < nShort ? shortLen : shortLen + 1;
+      var db = data.slice(pos, pos + dlen);
+      pos += dlen;
+      if (dlen > maxData) maxData = dlen;
+      dataBlocks.push(db);
+      ecBlocks.push(rsRemainder(db, ec));
+    }
+    var out = [];
+    for (var di = 0; di < maxData; di++) {
+      for (var b1 = 0; b1 < nb; b1++) if (di < dataBlocks[b1].length) out.push(dataBlocks[b1][di]);
+    }
+    for (var ei = 0; ei < ec; ei++) {
+      for (var b2 = 0; b2 < nb; b2++) out.push(ecBlocks[b2][ei]);
+    }
+    return out;
+  }
+
+  function Matrix(size) {
+    this.size = size;
+    this.m = new Uint8Array(size * size);
+    this.f = new Uint8Array(size * size);
+  }
+  Matrix.prototype.set = function (r, c, dark, func) {
+    var i = r * this.size + c;
+    this.m[i] = dark ? 1 : 0;
+    if (func) this.f[i] = 1;
+  };
+  Matrix.prototype.get = function (r, c) { return this.m[r * this.size + c]; };
+  Matrix.prototype.isF = function (r, c) { return this.f[r * this.size + c]; };
+
+  function stampFinders(mx) {
+    var size = mx.size;
+    var origins = [[0, 0], [0, size - 7], [size - 7, 0]];
+    for (var o = 0; o < 3; o++) {
+      var or0 = origins[o][0], oc = origins[o][1];
+      for (var r = -1; r <= 7; r++) {
+        for (var c = -1; c <= 7; c++) {
+          var rr = or0 + r, cc = oc + c;
+          if (rr < 0 || cc < 0 || rr >= size || cc >= size) continue;
+          var dark = (r >= 0 && r <= 6 && c >= 0 && c <= 6) &&
+                     (r === 0 || r === 6 || c === 0 || c === 6 || (r >= 2 && r <= 4 && c >= 2 && c <= 4));
+          mx.set(rr, cc, dark, true);
+        }
+      }
+    }
+  }
+  function stampTiming(mx) {
+    for (var i = 8; i < mx.size - 8; i++) {
+      var dark = i % 2 === 0;
+      if (!mx.isF(6, i)) mx.set(6, i, dark, true);
+      if (!mx.isF(i, 6)) mx.set(i, 6, dark, true);
+    }
+  }
+  function stampAlign(mx, version) {
+    var pos = alignPositions(version);
+    var size = mx.size;
+    for (var a = 0; a < pos.length; a++) {
+      for (var b = 0; b < pos.length; b++) {
+        var p = pos[a], q = pos[b];
+        if ((p < 9 && q < 9) || (p < 9 && q > size - 10) || (p > size - 10 && q < 9)) continue;
+        for (var r = -2; r <= 2; r++) {
+          for (var c = -2; c <= 2; c++) {
+            var dark = Math.max(Math.abs(r), Math.abs(c)) !== 1;
+            mx.set(p + r, q + c, dark, true);
+          }
+        }
+      }
+    }
+  }
+  function reserveFormat(mx) {
+    var size = mx.size;
+    for (var i = 0; i <= 8; i++) {
+      if (i !== 6) {
+        if (!mx.isF(8, i)) mx.set(8, i, 0, true);
+        if (!mx.isF(i, 8)) mx.set(i, 8, 0, true);
+      }
+    }
+    for (var j = 0; j < 8; j++) {
+      if (!mx.isF(8, size - 1 - j)) mx.set(8, size - 1 - j, 0, true);
+      if (!mx.isF(size - 1 - j, 8)) mx.set(size - 1 - j, 8, 0, true);
+    }
+    mx.f[(size - 8) * size + 8] = 1;
+  }
+  function stampVersionInfo(mx, version) {
+    if (version < 7) return;
+    var d = version << 12;
+    for (var i = 17; i >= 12; i--) { if ((d >>> i) & 1) d ^= 0x1F25 << (i - 12); }
+    var bits = (version << 12) | d;
+    var size = mx.size;
+    for (var k = 0; k < 18; k++) {
+      var bit = (bits >>> k) & 1;
+      var a = size - 11 + (k % 3), b = Math.floor(k / 3);
+      mx.set(a, b, bit, true);
+      mx.set(b, a, bit, true);
+    }
+  }
+  var EC_BITS = { L: 1, M: 0, Q: 3, H: 2 };
+  function stampFormat(mx, level, mask) {
+    var data5 = (EC_BITS[level] << 3) | mask;
+    var d = data5 << 10;
+    for (var i = 14; i >= 10; i--) { if ((d >>> i) & 1) d ^= 0x537 << (i - 10); }
+    var bits = ((data5 << 10) | d) ^ 0x5412;
+    var size = mx.size;
+    function bit(k) { return (bits >>> k) & 1; }
+
+    // Ispravan raspored QR format bitova po specifikaciji.
+    // Bitno: stara verzija ih je crtala transponirano pa neki skeneri nisu čitali QR.
+    for (var v = 0; v < 15; v++) {
+      if (v < 6) mx.set(v, 8, bit(v), true);
+      else if (v < 8) mx.set(v + 1, 8, bit(v), true);
+      else mx.set(size - 15 + v, 8, bit(v), true);
+    }
+
+    for (var h = 0; h < 15; h++) {
+      if (h < 8) mx.set(8, size - h - 1, bit(h), true);
+      else if (h === 8) mx.set(8, 7, bit(h), true);
+      else mx.set(8, 14 - h, bit(h), true);
+    }
+
+    mx.set(size - 8, 8, 1, true);
+  }
+  function maskBit(mask, r, c) {
+    switch (mask) {
+      case 0: return (r + c) % 2 === 0;
+      case 1: return r % 2 === 0;
+      case 2: return c % 3 === 0;
+      case 3: return (r + c) % 3 === 0;
+      case 4: return (Math.floor(r / 2) + Math.floor(c / 3)) % 2 === 0;
+      case 5: return (r * c) % 2 + (r * c) % 3 === 0;
+      case 6: return ((r * c) % 2 + (r * c) % 3) % 2 === 0;
+      default: return (((r + c) % 2) + ((r * c) % 3)) % 2 === 0;
+    }
+  }
+  function placeData(mx, codewords, mask) {
+    var size = mx.size;
+    var bitIdx = 0, totalBits = codewords.length * 8;
+    var upward = true;
+    for (var col = size - 1; col > 0; col -= 2) {
+      if (col === 6) col--;
+      for (var i = 0; i < size; i++) {
+        var r = upward ? size - 1 - i : i;
+        for (var dc = 0; dc < 2; dc++) {
+          var c = col - dc;
+          if (mx.isF(r, c)) continue;
+          var bit = 0;
+          if (bitIdx < totalBits) bit = (codewords[bitIdx >> 3] >>> (7 - (bitIdx & 7))) & 1;
+          bitIdx++;
+          if (maskBit(mask, r, c)) bit ^= 1;
+          mx.m[r * size + c] = bit;
+        }
+      }
+      upward = !upward;
+    }
+  }
+  function penalty(mx) {
+    var size = mx.size, score = 0, r, c, k;
+    for (r = 0; r < size; r++) {
+      var run = 1;
+      for (c = 1; c <= size; c++) {
+        if (c < size && mx.get(r, c) === mx.get(r, c - 1)) run++;
+        else { if (run >= 5) score += 3 + run - 5; run = 1; }
+      }
+    }
+    for (c = 0; c < size; c++) {
+      var run2 = 1;
+      for (r = 1; r <= size; r++) {
+        if (r < size && mx.get(r, c) === mx.get(r - 1, c)) run2++;
+        else { if (run2 >= 5) score += 3 + run2 - 5; run2 = 1; }
+      }
+    }
+    for (r = 0; r < size - 1; r++) {
+      for (c = 0; c < size - 1; c++) {
+        var v = mx.get(r, c);
+        if (v === mx.get(r, c + 1) && v === mx.get(r + 1, c) && v === mx.get(r + 1, c + 1)) score += 3;
+      }
+    }
+    var P1 = [1, 0, 1, 1, 1, 0, 1, 0, 0, 0, 0], P2 = [0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 1];
+    for (r = 0; r < size; r++) {
+      for (c = 0; c + 11 <= size; c++) {
+        var m1 = true, m2 = true;
+        for (k = 0; k < 11; k++) {
+          var vv = mx.get(r, c + k);
+          if (vv !== P1[k]) m1 = false;
+          if (vv !== P2[k]) m2 = false;
+        }
+        if (m1) score += 40;
+        if (m2) score += 40;
+      }
+    }
+    for (c = 0; c < size; c++) {
+      for (r = 0; r + 11 <= size; r++) {
+        var n1 = true, n2 = true;
+        for (k = 0; k < 11; k++) {
+          var vv2 = mx.get(r + k, c);
+          if (vv2 !== P1[k]) n1 = false;
+          if (vv2 !== P2[k]) n2 = false;
+        }
+        if (n1) score += 40;
+        if (n2) score += 40;
+      }
+    }
+    var dark = 0;
+    for (var ii = 0; ii < size * size; ii++) dark += mx.m[ii];
+    var pct = dark * 100 / (size * size);
+    score += Math.floor(Math.abs(pct - 50) / 5) * 10;
+    return score;
+  }
+
+  function buildMatrix(codewords, version, level, mask) {
+    var size = 17 + 4 * version;
+    var mx = new Matrix(size);
+    stampFinders(mx);
+    stampAlign(mx, version);
+    stampTiming(mx);
+    reserveFormat(mx);
+    stampVersionInfo(mx, version);
+    placeData(mx, codewords, mask);
+    stampFormat(mx, level, mask);
+    return mx;
+  }
+
+  function make(text, opts) {
+    opts = opts || {};
+    var bytes = toUTF8(String(text));
+    var level = opts.level || 'M';
+    var version = opts.version || pickVersion(bytes.length, level);
+    if (!version && !opts.level && !opts.version) { level = 'L'; version = pickVersion(bytes.length, level); }
+    if (!version || (opts.version && !fitsIn(version, level, bytes.length))) {
+      var err = new Error('sadržaj ima ' + bytes.length + ' bajtova, a u QR kod stane najviše ' + maxBytes() + '.');
+      err.name = 'QROverflow';
+      throw err;
+    }
+    var codewords = buildCodewords(bytes, version, level);
+    var best = null, bestScore = Infinity, bestMask = 0;
+    if (typeof opts.mask === 'number') {
+      best = buildMatrix(codewords, version, level, opts.mask);
+      bestMask = opts.mask;
+    } else {
+      for (var m = 0; m < 8; m++) {
+        var cand = buildMatrix(codewords, version, level, m);
+        var s = penalty(cand);
+        if (s < bestScore) { bestScore = s; best = cand; bestMask = m; }
+      }
+    }
+    return {
+      size: best.size, version: version, level: level, mask: bestMask,
+      get: function (r, c) { return best.get(r, c); },
+      isFn: function (r, c) { return best.isF(r, c); }
+    };
+  }
+
+  return { make: make, maxBytes: maxBytes };
+})();
+</script>
+<script>
+(function () {
+  'use strict';
+
+  var $ = function (s, r) { return (r || document).querySelector(s); };
+  var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+
+  var STORAGE_KEY = 'vizitka-podaci';
+  var STD_KEYS = ['name', 'position', 'company', 'phone', 'email', 'website', 'address'];
+
+  var KIND_META = {
+    phone: { base: 'Telefon', icon: 'phone', type: 'tel', ph: '+385 1 234 5678' },
+    email: { base: 'Email', icon: 'mail', type: 'email', ph: 'ured@acme.hr' },
+    web:   { base: 'Web', icon: 'globe', type: 'text', ph: 'linkedin.com/in/ana' },
+    other: { base: 'Dodatno polje', icon: 'tag', type: 'text', ph: 'Vrijednost' }
+  };
+
+  var ICONS = {
+    phone: '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>',
+    mail: '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>',
+    globe: '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>',
+    pin: '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>',
+    tag: '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41 12 22 2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><circle cx="7" cy="7" r="1"/></svg>'
+  };
+
+  var CARD_TPL =
+    '<div class="biz-card">' +
+      '<div class="biz-frame"></div>' +
+      '<div class="card-top">' +
+        '<div class="monogram"><span class="monogram-in" data-slot="monogram">&middot;&middot;</span></div>' +
+        '<div class="card-id">' +
+          '<h3 class="card-name" data-slot="name">Ime Prezime</h3>' +
+          '<p class="card-role" data-slot="role" hidden></p>' +
+        '</div>' +
+      '</div>' +
+      '<div class="card-rule"></div>' +
+      '<ul class="card-rows" data-slot="rows"></ul>' +
+    '</div>';
+
+  var state = { name: '', position: '', company: '', phone: '', email: '', website: '', address: '', extras: [] };
+
+  function uid() { return 'x' + Math.random().toString(36).slice(2, 9); }
+
+  /* ---------- kartica ---------- */
+
+  function mountCards() {
+    $$('.biz-mount').forEach(function (m) { m.innerHTML = CARD_TPL; });
+  }
+
+  function initials(name) {
+    var parts = name.trim().split(/\s+/).filter(Boolean);
+    if (!parts.length) return '··';
+    var a = parts[0].charAt(0);
+    var b = parts.length > 1 ? parts[parts.length - 1].charAt(0) : '';
+    return (a + b).toUpperCase();
+  }
+
+  function displayUrl(v) { return v.replace(/^https?:\/\//i, '').replace(/\/$/, ''); }
+  function normUrl(v) { return /^https?:\/\//i.test(v) ? v : 'https://' + v; }
+
+  function cardItems() {
+    var items = [];
+    if (state.phone.trim()) items.push({ icon: 'phone', text: state.phone.trim() });
+    if (state.email.trim()) items.push({ icon: 'mail', text: state.email.trim() });
+    if (state.website.trim()) items.push({ icon: 'globe', text: displayUrl(state.website.trim()) });
+    if (state.address.trim()) items.push({ icon: 'pin', text: state.address.trim() });
+    state.extras.forEach(function (x) {
+      var v = (x.value || '').trim();
+      if (!v) return;
+      if (x.kind === 'web') v = displayUrl(v);
+      var label = x.kind === 'other' ? (x.label || '').trim() : '';
+      items.push({ icon: KIND_META[x.kind].icon, text: label ? label + ': ' + v : v });
+    });
+    return items;
+  }
+
+  function fillCards() {
+    $$('.biz-mount').forEach(function (m) {
+      var name = state.name.trim();
+      var nameEl = $('[data-slot=name]', m);
+      nameEl.textContent = name || 'Ime Prezime';
+      nameEl.classList.toggle('is-ph', !name);
+      $('[data-slot=monogram]', m).textContent = initials(name);
+
+      var role = [state.position.trim(), state.company.trim()].filter(Boolean).join(' · ');
+      var roleEl = $('[data-slot=role]', m);
+      roleEl.textContent = role;
+      roleEl.hidden = !role;
+
+      var rowsEl = $('[data-slot=rows]', m);
+      rowsEl.innerHTML = '';
+      var items = cardItems();
+      if (!items.length) {
+        var ph = document.createElement('li');
+        ph.className = 'row-ph';
+        ph.textContent = 'Tu će se ispisati tvoji kontakti.';
+        rowsEl.appendChild(ph);
+        return;
+      }
+      items.forEach(function (it) {
+        var li = document.createElement('li');
+        var ic = document.createElement('span');
+        ic.className = 'row-ic';
+        ic.innerHTML = ICONS[it.icon];
+        var tx = document.createElement('span');
+        tx.className = 'row-tx';
+        tx.textContent = it.text;
+        li.appendChild(ic);
+        li.appendChild(tx);
+        rowsEl.appendChild(li);
+      });
+    });
+  }
+
+  /* ---------- dodatna polja ---------- */
+
+  function addExtra(kind) {
+    var count = state.extras.filter(function (x) { return x.kind === kind; }).length;
+    var label = kind === 'other' ? '' : KIND_META[kind].base + ' ' + (count + 2);
+    state.extras.push({ id: uid(), kind: kind, label: label, value: '' });
+    renderExtras();
+    fillCards();
+    var rows = $$('#extras .extra');
+    var last = rows[rows.length - 1];
+    if (last) {
+      var target = $('input.x-label-input', last) || $('input.x-value', last);
+      if (target) target.focus();
+    }
+  }
+
+  function renderExtras() {
+    var wrap = $('#extras');
+    wrap.innerHTML = '';
+    state.extras.forEach(function (x) {
+      var row = document.createElement('div');
+      row.className = 'field extra';
+
+      var head = document.createElement('div');
+      head.className = 'x-head';
+
+      if (x.kind === 'other') {
+        var lab = document.createElement('input');
+        lab.type = 'text';
+        lab.className = 'x-label-input';
+        lab.value = x.label;
+        lab.placeholder = 'Naziv polja (npr. LinkedIn)';
+        lab.setAttribute('aria-label', 'Naziv dodatnog polja');
+        lab.addEventListener('input', function () { x.label = lab.value; fillCards(); });
+        head.appendChild(lab);
+      } else {
+        var span = document.createElement('span');
+        span.className = 'x-label';
+        span.textContent = x.label;
+        head.appendChild(span);
+      }
+
+      var del = document.createElement('button');
+      del.type = 'button';
+      del.className = 'x-del';
+      del.textContent = 'Ukloni';
+      del.addEventListener('click', function () {
+        state.extras = state.extras.filter(function (e) { return e.id !== x.id; });
+        renderExtras();
+        fillCards();
+      });
+      head.appendChild(del);
+      row.appendChild(head);
+
+      var inp = document.createElement('input');
+      inp.type = KIND_META[x.kind].type;
+      inp.className = 'x-value';
+      inp.value = x.value;
+      inp.placeholder = KIND_META[x.kind].ph;
+      inp.setAttribute('aria-label', x.label || 'Dodatno polje');
+      inp.addEventListener('input', function () { x.value = inp.value; fillCards(); });
+      row.appendChild(inp);
+
+      wrap.appendChild(row);
+    });
+  }
+
+  /* ---------- vCard ---------- */
+
+  function esc(v) {
+    return String(v)
+      .replace(/\\/g, '\\\\')
+      .replace(/\r?\n/g, '\\n')
+      .replace(/,/g, '\\,')
+      .replace(/;/g, '\\;');
+  }
+
+  function buildVCard() {
+    var L = ['BEGIN:VCARD', 'VERSION:3.0'];
+    var name = state.name.trim();
+    var parts = name.split(/\s+/).filter(Boolean);
+    var last = parts.length > 1 ? parts[parts.length - 1] : '';
+    var first = parts.length > 1 ? parts.slice(0, -1).join(' ') : (parts[0] || '');
+    L.push('N:' + esc(last) + ';' + esc(first) + ';;;');
+    L.push('FN:' + esc(name));
+    if (state.company.trim()) L.push('ORG:' + esc(state.company.trim()));
+    if (state.position.trim()) L.push('TITLE:' + esc(state.position.trim()));
+    if (state.phone.trim()) L.push('TEL;TYPE=CELL:' + esc(state.phone.trim()));
+    if (state.email.trim()) L.push('EMAIL;TYPE=INTERNET:' + esc(state.email.trim()));
+    if (state.website.trim()) L.push('URL:' + esc(normUrl(state.website.trim())));
+    if (state.address.trim()) L.push('ADR;TYPE=WORK:;;' + esc(state.address.trim()) + ';;;;');
+
+    var notes = [];
+    state.extras.forEach(function (x) {
+      var v = (x.value || '').trim();
+      if (!v) return;
+      if (x.kind === 'phone') L.push('TEL;TYPE=WORK:' + esc(v));
+      else if (x.kind === 'email') L.push('EMAIL;TYPE=WORK:' + esc(v));
+      else if (x.kind === 'web') L.push('URL:' + esc(normUrl(v)));
+      else notes.push(((x.label || '').trim() || 'Info') + ': ' + v);
+    });
+    if (notes.length) L.push('NOTE:' + esc(notes.join('\n')));
+
+    L.push('END:VCARD');
+    return L.join('\r\n');
+  }
+
+  function slug(s) {
+    return (s || '')
+      .replace(/đ/g, 'd').replace(/Đ/g, 'D')
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'vizitka';
+  }
+
+  /* ---------- QR ---------- */
+
+  function renderQR() {
+    var el = $('#qrcode');
+    el.innerHTML = '';
+    if (typeof QRMatrix === 'undefined') {
+      el.innerHTML = '<p class="qr-err">QR modul se nije učitao — osvježi stranicu.</p>';
+      return;
+    }
+    var qr;
+    try {
+      qr = QRMatrix.make(buildVCard(), { level: 'M' });
+    } catch (e) {
+      var msg = e && e.name === 'QROverflow'
+        ? 'Previše podataka za jedan QR kod — skrati neka polja pa spremi ponovno.'
+        : 'QR se nije mogao generirati: ' + ((e && e.message) || 'nepoznata greška') + '.';
+      el.innerHTML = '<p class="qr-err">' + msg + '</p>';
+      return;
+    }
+    var quiet = 4;
+    var target = 232;
+    var modules = qr.size + quiet * 2;
+    var scale = Math.max(2, Math.round(target / modules));
+    var px = modules * scale;
+    var canvas = document.createElement('canvas');
+    canvas.width = px;
+    canvas.height = px;
+    canvas.style.width = px + 'px';
+    canvas.style.height = px + 'px';
+    canvas.setAttribute('role', 'img');
+    canvas.setAttribute('aria-label', 'QR kod s tvojim kontakt podacima');
+    var ctx = canvas.getContext('2d');
+    ctx.imageSmoothingEnabled = false;
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, px, px);
+    ctx.fillStyle = '#000000';
+    for (var r = 0; r < qr.size; r++) {
+      for (var c = 0; c < qr.size; c++) {
+        if (qr.get(r, c)) {
+          ctx.fillRect((c + quiet) * scale, (r + quiet) * scale, scale, scale);
+        }
+      }
+    }
+    el.appendChild(canvas);
+
+    // Samoprovjera: procitaj piksele natrag i potvrdi da je gornji-lijevi
+    // finder ispravan na ocekivanoj skali (otkriva zamucenje ili krivo crtanje).
+    try {
+      var probe = ctx.getImageData(0, 0, px, px).data;
+      var isDark = function (mr, mc) {
+        var x = (mc + quiet) * scale + (scale >> 1);
+        var y = (mr + quiet) * scale + (scale >> 1);
+        var i = (y * px + x) * 4;
+        return probe[i] < 128;
+      };
+      var finderOk = true;
+      for (var fr = 0; fr < 7 && finderOk; fr++) {
+        for (var fc = 0; fc < 7; fc++) {
+          var expectDark = fr === 0 || fr === 6 || fc === 0 || fc === 6 ||
+                           (fr >= 2 && fr <= 4 && fc >= 2 && fc <= 4);
+          if (isDark(fr, fc) !== expectDark) { finderOk = false; break; }
+        }
+      }
+      if (!finderOk && window.console) {
+        console.warn('QR samoprovjera: finder uzorak nije oštar — moguć problem s prikazom.');
+      }
+    } catch (probeErr) { /* getImageData može pasti u rijetkim okruženjima; preskoči */ }
+  }
+
+  function downloadQR() {
+    var c = $('#qrcode canvas');
+    if (!c) { toast('QR kod još nije generiran'); return; }
+    var pad = 32;
+    var scaleUp = 3;
+    var out = document.createElement('canvas');
+    out.width = c.width * scaleUp + pad * 2;
+    out.height = c.height * scaleUp + pad * 2;
+    var ctx = out.getContext('2d');
+    ctx.imageSmoothingEnabled = false;
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, out.width, out.height);
+    ctx.drawImage(c, pad, pad, c.width * scaleUp, c.height * scaleUp);
+    var a = document.createElement('a');
+    a.href = out.toDataURL('image/png');
+    a.download = 'vizitka-qr-' + slug(state.name) + '.png';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    toast('QR kod preuzet');
+  }
+
+  function downloadVCF() {
+    var blob = new Blob([buildVCard()], { type: 'text/vcard;charset=utf-8' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = slug(state.name) + '.vcf';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
+    toast('Kontakt (.vcf) preuzet');
+  }
+
+  function shareText() {
+    var lines = [state.name.trim()];
+    var role = [state.position.trim(), state.company.trim()].filter(Boolean).join(', ');
+    if (role) lines.push(role);
+    if (state.phone.trim()) lines.push('Tel: ' + state.phone.trim());
+    if (state.email.trim()) lines.push('Email: ' + state.email.trim());
+    if (state.website.trim()) lines.push(normUrl(state.website.trim()));
+    if (state.address.trim()) lines.push(state.address.trim());
+    state.extras.forEach(function (x) {
+      var v = (x.value || '').trim();
+      if (v) lines.push((x.kind === 'other' && x.label ? x.label + ': ' : '') + v);
+    });
+    return lines.join('\n');
+  }
+
+  function shareCard() {
+    var vcf = buildVCard();
+    var fileName = slug(state.name) + '.vcf';
+    var file = null;
+    var canFiles = false;
+    try {
+      file = new File([vcf], fileName, { type: 'text/vcard' });
+      canFiles = !!(navigator.canShare && navigator.canShare({ files: [file] }));
+    } catch (e) { canFiles = false; }
+
+    if (canFiles) {
+      navigator.share({ files: [file], title: 'Vizitka — ' + state.name }).catch(function () {});
+    } else if (navigator.share) {
+      navigator.share({ title: 'Vizitka — ' + state.name, text: shareText() }).catch(function () {});
+    } else {
+      downloadVCF();
+    }
+  }
+
+  /* ---------- trajno spremanje ---------- */
+
+  function persist() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      return Promise.resolve(true);
+    } catch (e) {
+      return Promise.resolve(false);
+    }
+  }
+
+  function restore() {
+    try {
+      var r = localStorage.getItem(STORAGE_KEY);
+      if (!r) return Promise.resolve(null);
+      return Promise.resolve(JSON.parse(r));
+    } catch (e) {
+      return Promise.resolve(null);
+    }
+  }
+
+  function applySaved(saved) {
+    if (!saved || typeof saved !== 'object') return false;
+    STD_KEYS.forEach(function (k) {
+      if (typeof saved[k] === 'string') state[k] = saved[k];
+    });
+    if (Array.isArray(saved.extras)) {
+      state.extras = saved.extras
+        .filter(function (x) { return x && KIND_META[x.kind] && typeof x.value === 'string'; })
+        .map(function (x) {
+          return { id: x.id || uid(), kind: x.kind, label: typeof x.label === 'string' ? x.label : '', value: x.value };
+        });
+    }
+    return !!state.name.trim();
+  }
+
+  /* ---------- UI ---------- */
+
+  function syncForm() {
+    STD_KEYS.forEach(function (k) {
+      var inp = $('[data-key="' + k + '"]');
+      if (inp) inp.value = state[k];
+    });
+  }
+
+  function showView(v) {
+    $('#view-editor').hidden = v !== 'editor';
+    $('#view-card').hidden = v !== 'card';
+    window.scrollTo(0, 0);
+  }
+
+  var toastTimer = null;
+  function toast(msg) {
+    var t = $('#toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { t.classList.remove('show'); }, 2400);
+  }
+
+  function wire() {
+    $$('[data-key]').forEach(function (inp) {
+      inp.addEventListener('input', function () {
+        state[inp.dataset.key] = inp.value;
+        if (inp.dataset.key === 'name') $('#name-err').hidden = true;
+        fillCards();
+      });
+    });
+
+    $$('.chip[data-add]').forEach(function (b) {
+      b.addEventListener('click', function () { addExtra(b.dataset.add); });
+    });
+
+    $('#btn-save').addEventListener('click', function () {
+      if (!state.name.trim()) {
+        $('#name-err').hidden = false;
+        $('#f-name').focus();
+        return;
+      }
+      var btn = $('#btn-save');
+      btn.disabled = true;
+      btn.textContent = 'Spremam…';
+      persist().then(function (ok) {
+        btn.disabled = false;
+        btn.textContent = 'Spremi i generiraj QR';
+        fillCards();
+        renderQR();
+        showView('card');
+        toast(ok ? 'Vizitka spremljena' : 'Spremljeno za ovu sesiju');
+      });
+    });
+
+    var armed = false;
+    var armTimer = null;
+    $('#btn-reset').addEventListener('click', function () {
+      var btn = $('#btn-reset');
+      if (!armed) {
+        armed = true;
+        btn.textContent = 'Sigurno? Klikni opet';
+        btn.classList.add('armed');
+        armTimer = setTimeout(function () {
+          armed = false;
+          btn.textContent = 'Obriši sve';
+          btn.classList.remove('armed');
+        }, 3500);
+        return;
+      }
+      clearTimeout(armTimer);
+      armed = false;
+      btn.textContent = 'Obriši sve';
+      btn.classList.remove('armed');
+      try { localStorage.removeItem(STORAGE_KEY); } catch(e) {}
+      STD_KEYS.forEach(function (k) { state[k] = ''; });
+      state.extras = [];
+      syncForm();
+      renderExtras();
+      fillCards();
+      toast('Podaci obrisani');
+    });
+
+    $('#btn-edit').addEventListener('click', function () { showView('editor'); });
+    $('#btn-share').addEventListener('click', shareCard);
+    $('#btn-png').addEventListener('click', downloadQR);
+    $('#btn-vcf').addEventListener('click', downloadVCF);
+  }
+
+  function init() {
+    mountCards();
+    wire();
+    restore().then(function (saved) {
+      var hasData = applySaved(saved);
+      syncForm();
+      renderExtras();
+      fillCards();
+      
+      var splash = $('#splash');
+      if (splash) splash.remove();
+      if (hasData) {
+        renderQR();
+        showView('card');
+      } else {
+        showView('editor');
+      }
+    });
+  }
+
+  if ('serviceWorker' in navigator) { navigator.serviceWorker.register('./service-worker.js').catch(function(){});} 
+  init();
+})();
+</script>
+</body>
+</html>

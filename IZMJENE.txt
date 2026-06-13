@@ -1,0 +1,11 @@
+IZMJENE - nova PWA ikona
+
+- Zamijenjene su PWA ikone icon-192.png i icon-512.png novim premium VIZITKA dizajnom.
+- Dodana je apple-touch-icon.png za iPhone početni zaslon.
+- Ažuriran je manifest.json s tamnom theme/background bojom.
+- Ažuriran je service-worker cache na novu verziju da iPhone ne zadržava staru ikonu.
+- QR popravak i bljeđi primjer teksta iz prethodne verzije su zadržani.
+
+UPLOAD NA GITHUB:
+Uploadaj sve datoteke iz ovog ZIP-a direktno u root repozitorija.
+Nakon objave obriši staru ikonu aplikacije s iPhone zaslona i ponovno dodaj preko Safari → Share → Add to Home Screen.
